@@ -1,19 +1,19 @@
 # CapViewer
 
-To start your Phoenix server:
+A simple viewer for [cap](https://github.com/ckampfe/cap)
 
-  * Install dependencies with `mix deps.get`
-  * Install Node.js dependencies with `cd assets && npm install`
-  * Start Phoenix endpoint with `mix phx.server`
+![example](https://i.imgur.com/uMFs9ysl.png)
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+To use this:
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: http://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
+```sh
+$ git clone
+$ cd cap_viewer
+# modify config/config.exs here:
+# https://github.com/ckampfe/cap_viewer/blob/master/config/config.exs#L20-L21
+# so it points to the path of your cap database
+$ mix deps.get
+$ cd assets && npm install
+$ mix phx.server
+# got to localhost:4000/entries
+```
