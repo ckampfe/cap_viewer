@@ -1,7 +1,8 @@
 defmodule CapViewerWeb.EntriesLive do
   use Phoenix.LiveView
 
-  @sqlite_db_location Application.fetch_env!(:cap_viewer, :sqlite_db_location) |> String.to_charlist
+  @sqlite_db_location Application.fetch_env!(:cap_viewer, :sqlite_db_location)
+                      |> String.to_charlist()
 
   def render(assigns) do
     ~L"""
@@ -11,8 +12,8 @@ defmodule CapViewerWeb.EntriesLive do
 
       <button phx-click="flip-sort">Sort <%= if(@sort == "ASC", do: "DESC", else: "ASC") %></button>
 
-      <form phx-change="search" style="float: right;">
-        <input type="text" name="q" value="<%= @query %>" placeholder="Search..." />
+    <form phx-change="search" style="float: right;">
+    <input type="text" name="q" value="<%= @query %>" placeholder="Search..." />
       </form>
       </div>
 
@@ -29,7 +30,6 @@ defmodule CapViewerWeb.EntriesLive do
             <hr />
 
           <% end %>
-          <hr />
           </div>
       <% end %>
     <% else %>
@@ -111,12 +111,29 @@ defmodule CapViewerWeb.EntriesLive do
         )
       end)
 
-    {:ok, group_entries_by_date(entries)}
+    {:ok, group_entries_by_date(entries, sort)}
   end
 
-  def group_entries_by_date(entries) do
-    Enum.group_by(entries, fn entry ->
-      entry[:date]
-    end)
+  def group_entries_by_date(entries, sort) do
+    grouped =
+      Enum.group_by(entries, fn entry ->
+        entry[:date]
+      end)
+
+    greater_than_or_equal = MapSet.new([:gt, :eq])
+
+    if sort == "ASC" do
+      Enum.sort(grouped)
+    else
+      Enum.sort_by(
+        grouped,
+        fn {date, _entries} ->
+          Date.from_iso8601!(date)
+        end,
+        fn d1, d2 ->
+          MapSet.member?(greater_than_or_equal, Date.compare(d1, d2))
+        end
+      )
+    end
   end
 end
