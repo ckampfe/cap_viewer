@@ -7,7 +7,7 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :cap_viewer, CapViewerWeb.Endpoint,
-  http: [port: 4000],
+  http: [port: System.get_env("PORT") || 4000],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
@@ -53,7 +53,7 @@ config :cap_viewer, CapViewerWeb.Endpoint,
       ~r{priv/gettext/.*(po)$},
       ~r{lib/cap_viewer_web/views/.*(ex)$},
       ~r{lib/cap_viewer_web/templates/.*(eex)$},
-      ~r{lib/my_app_web/live/.*(ex)$}
+      ~r{lib/cap_viewer_web/live/.*(ex)$}
     ]
   ]
 

@@ -7,34 +7,52 @@ defmodule CapViewerWeb.EntriesLive do
   def render(assigns) do
     ~L"""
     <div>
+      <div class="container">
+        <div class="row" style="display: flex; align-items: center; ">
 
-      <button phx-click="reload">Reload</button>
+          <div class="column column-50">
+            <button phx-click="reload">Reload</button>
+            <button phx-click="flip-sort">
+              Sort <%= if(@sort == "ASC", do: "DESC", else: "ASC") %>
+            </button>
+          </div>
 
-      <button phx-click="flip-sort">Sort <%= if(@sort == "ASC", do: "DESC", else: "ASC") %></button>
+          <div class="column column-4" style="margin-left: auto;">
+            <form phx-change="search" style="margin-bottom: 0;">
+              <input type="text" name="q" value="<%= @query %>" placeholder="Search..." style="margin-bottom: 0 auto;"/>
+            </form>
+          </div>
 
-    <form phx-change="search" style="float: right;">
-    <input type="text" name="q" value="<%= @query %>" placeholder="Search..." />
-      </form>
+          <div class="column">
+            <%= if @query_time_usec do %>
+            <h6>
+              <%= @query_time_usec %> µsec
+            </h6>
+            <% end %>
+          </div>
+
+        </div>
       </div>
 
-    <div>
-
-    <%= if @entries != %{} do %>
-      <%= for {date, entries} <- @entries do %>
       <div>
-        <h3><%= date %></h3>
-          <%= for entry <- entries do %>
+        <%= if @entries != %{} do %>
+          <%= for {date, entries} <- @entries do %>
             <div>
-              <%= render_entry(assigns, entry) %>
-            </div>
-            <hr />
+              <h3><%= date %></h3>
+                <%= for entry <- entries do %>
+                  <div>
+                    <%= render_entry(assigns, entry) %>
+                  </div>
 
+                  <hr />
+
+                <% end %>
+            </div>
           <% end %>
-          </div>
-      <% end %>
-    <% else %>
-      <h3>No entries</h3>
-    <% end %>
+        <% else %>
+          <h3>No entries</h3>
+        <% end %>
+      </div>
     </div>
     """
   end
@@ -51,21 +69,31 @@ defmodule CapViewerWeb.EntriesLive do
   end
 
   def mount(_session, socket) do
-    {:ok, entries} = fetch_entries(%{sort: "DESC", query: ""})
-    {:ok, assign(socket, entries: entries, days: 10, sort: "DESC", query: "")}
+    {query_time_usec, {:ok, entries}} =
+      :timer.tc(fn -> fetch_entries(%{sort: "DESC", query: ""}) end)
+
+    {:ok,
+     assign(socket,
+       entries: entries,
+       days: 10,
+       sort: "DESC",
+       query: "",
+       query_time_usec: query_time_usec
+     )}
   end
 
   def handle_event("reload", _path, socket) do
     opts = Enum.into(socket.assigns, %{})
 
-    {:ok, entries} = fetch_entries(opts)
+    {query_time_usec, {:ok, entries}} = :timer.tc(fn -> fetch_entries(opts) end)
 
     {:noreply,
      assign(socket,
        entries: entries,
        sort: socket.assigns[:sort],
        days: socket.assigns[:days],
-       query: socket.assigns[:query]
+       query: socket.assigns[:query],
+       query_time_usec: query_time_usec
      )}
   end
 
@@ -82,14 +110,22 @@ defmodule CapViewerWeb.EntriesLive do
       |> Enum.into(%{})
       |> Map.put(:sort, new_sort)
 
-    {:ok, entries} = fetch_entries(opts)
+    {query_time_usec, {:ok, entries}} = :timer.tc(fn -> fetch_entries(opts) end)
 
-    {:noreply, assign(socket, entries: entries, sort: new_sort, query: socket.assigns[:query])}
+    {:noreply,
+     assign(socket,
+       entries: entries,
+       sort: new_sort,
+       query: socket.assigns[:query],
+       query_time_usec: query_time_usec
+     )}
   end
 
   def handle_event("search", %{"q" => query}, socket) do
-    {:ok, entries} = fetch_entries(%{sort: socket.assigns[:sort], query: query})
-    {:noreply, assign(socket, entries: entries, query: query)}
+    {query_time_usec, {:ok, entries}} =
+      :timer.tc(fn -> fetch_entries(%{sort: socket.assigns[:sort], query: query}) end)
+
+    {:noreply, assign(socket, entries: entries, query: query, query_time_usec: query_time_usec)}
   end
 
   def fetch_entries(%{query: query, sort: sort}) do
