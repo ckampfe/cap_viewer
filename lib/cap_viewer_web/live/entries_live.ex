@@ -8,24 +8,24 @@ defmodule CapViewerWeb.EntriesLive do
     ~L"""
     <div>
       <div class="container">
-        <div class="row" style="display: flex; align-items: center; ">
+        <div class="row" style="display: flex; align-items: center; margin-bottom: 1.0rem;">
 
           <div class="column column-50">
-            <button phx-click="reload">Reload</button>
-            <button phx-click="flip-sort">
+            <button phx-click="reload" style="margin-bottom: 0;">Reload</button>
+            <button phx-click="flip-sort" style="margin-bottom: 0;">
               Sort <%= if(@sort == "ASC", do: "DESC", else: "ASC") %>
             </button>
           </div>
 
           <div class="column column-4" style="margin-left: auto;">
             <form phx-change="search" style="margin-bottom: 0;">
-              <input type="text" name="q" value="<%= @query %>" placeholder="Search..." style="margin-bottom: 0 auto;"/>
+              <input type="text" name="q" value="<%= @query %>" placeholder="Search..." style="margin-bottom: 0;"/>
             </form>
           </div>
 
           <div class="column">
             <%= if @query_time_usec do %>
-            <h6>
+            <h6 style="margin: auto;">
               <%= @query_time_usec %> µsec
             </h6>
             <% end %>
