@@ -7,6 +7,12 @@ defmodule CapViewerWeb.EntriesLive do
   def render(assigns) do
     ~L"""
     <div>
+      <%= @uptime %>
+
+      <%= for per <- [10, 25, 50, 100, "all"] do %>
+        <a phx-click="per-page-<%= per %>" href=""><%= per %></a>
+      <% end %>
+
       <div class="container">
         <div class="row" style="display: flex; align-items: center; margin-bottom: 1.0rem;">
 
@@ -70,7 +76,9 @@ defmodule CapViewerWeb.EntriesLive do
 
   def mount(_session, socket) do
     {query_time_usec, {:ok, entries}} =
-      :timer.tc(fn -> fetch_entries(%{sort: "DESC", query: ""}) end)
+      :timer.tc(fn -> fetch_entries(%{sort: "DESC", query: "", per_page: "100"}) end)
+
+    :timer.send_interval(:timer.minutes(1), self(), :tick)
 
     {:ok,
      assign(socket,
@@ -78,8 +86,26 @@ defmodule CapViewerWeb.EntriesLive do
        days: 10,
        sort: "DESC",
        query: "",
-       query_time_usec: query_time_usec
+       query_time_usec: query_time_usec,
+       uptime: uptime(),
+       per_page: "all"
      )}
+  end
+
+  def handle_info(:tick, socket) do
+    uptime = uptime()
+    {:noreply, assign(socket, uptime: uptime)}
+  end
+
+  def handle_event("per-page-" <> per_page, path, socket) do
+    opts =
+      socket.assigns
+      |> Enum.into(%{})
+      |> Map.put(:per_page, per_page)
+
+    {query_time_usec, {:ok, entries}} = :timer.tc(fn -> fetch_entries(opts) end)
+
+    {:noreply, assign(socket, per_page: per_page, entries: entries)}
   end
 
   def handle_event("reload", _path, socket) do
@@ -128,7 +154,7 @@ defmodule CapViewerWeb.EntriesLive do
     {:noreply, assign(socket, entries: entries, query: query, query_time_usec: query_time_usec)}
   end
 
-  def fetch_entries(%{query: query, sort: sort}) do
+  def fetch_entries(%{query: query, sort: sort, per_page: per_page}) do
     {:ok, entries} =
       Sqlitex.with_db(@sqlite_db_location, fn db ->
         Sqlitex.query(
@@ -142,6 +168,9 @@ defmodule CapViewerWeb.EntriesLive do
             )
           }
         ORDER BY created_at #{sort}
+
+        #{if(per_page != "all", do: "LIMIT " <> per_page, else: "")}
+
         ;",
           into: %{}
         )
@@ -171,5 +200,12 @@ defmodule CapViewerWeb.EntriesLive do
         end
       )
     end
+  end
+
+  def uptime() do
+    # http://erlang.org/pipermail/erlang-questions/2010-March/050079.html
+    {uptime, _} = :erlang.statistics(:wall_clock)
+    {days, {hours, minutes, seconds}} = :calendar.seconds_to_daystime(div(uptime, 1000))
+    "#{days} days, #{hours} hours, #{minutes} minutes and #{seconds} seconds"
   end
 end

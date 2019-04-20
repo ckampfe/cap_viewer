@@ -4,8 +4,8 @@ defmodule CapViewer.MixProject do
   def project do
     [
       app: :cap_viewer,
-      version: "0.1.0",
-      elixir: "~> 1.5",
+      version: "0.2.0",
+      elixir: "~> 1.8",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -40,7 +40,8 @@ defmodule CapViewer.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"},
-      {:sqlitex, "~> 1.5"}
+      {:sqlitex, "~> 1.5"},
+      {:distillery, "~> 2.0"}
     ]
   end
 end
