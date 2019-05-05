@@ -76,7 +76,7 @@ defmodule CapViewerWeb.EntriesLive do
 
   def mount(_session, socket) do
     {query_time_usec, {:ok, entries}} =
-      :timer.tc(fn -> fetch_entries(%{sort: "DESC", query: "", per_page: "100"}) end)
+      :timer.tc(fn -> fetch_entries(%{sort: "DESC", query: "", per_page: "25"}) end)
 
     :timer.send_interval(:timer.minutes(1), self(), :tick)
 

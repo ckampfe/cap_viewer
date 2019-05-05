@@ -16,7 +16,7 @@
                  </ul> -->
             <ul>
                 <li>
-                    Cap
+                  Cap <%= to_string(Application.spec(:cap_viewer, :vsn)) %>
                 </li>
             </ul>
         </nav>
