@@ -97,7 +97,7 @@ defmodule CapViewerWeb.EntriesLive do
     {:noreply, assign(socket, uptime: uptime)}
   end
 
-  def handle_event("per-page-" <> per_page, path, socket) do
+  def handle_event("per-page-" <> per_page, _path, socket) do
     opts =
       socket.assigns
       |> Enum.into(%{})
@@ -105,7 +105,8 @@ defmodule CapViewerWeb.EntriesLive do
 
     {query_time_usec, {:ok, entries}} = :timer.tc(fn -> fetch_entries(opts) end)
 
-    {:noreply, assign(socket, per_page: per_page, entries: entries)}
+    {:noreply,
+     assign(socket, per_page: per_page, entries: entries, query_time_usec: query_time_usec)}
   end
 
   def handle_event("reload", _path, socket) do
@@ -148,8 +149,12 @@ defmodule CapViewerWeb.EntriesLive do
   end
 
   def handle_event("search", %{"q" => query}, socket) do
-    {query_time_usec, {:ok, entries}} =
-      :timer.tc(fn -> fetch_entries(%{sort: socket.assigns[:sort], query: query}) end)
+    opts =
+      socket.assigns
+      |> Enum.into(%{})
+      |> Map.put(:query, query)
+
+    {query_time_usec, {:ok, entries}} = :timer.tc(fn -> fetch_entries(opts) end)
 
     {:noreply, assign(socket, entries: entries, query: query, query_time_usec: query_time_usec)}
   end
