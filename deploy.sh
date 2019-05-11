@@ -3,14 +3,17 @@
 
 PROJECT="cap_viewer"
 
+# precompile
+MIX_ENV=prod mix deps.compile
+MIX_ENV=prod mix compile
+MIX_ENV=prod mix app.version
+
 # see lib/mix/tasks/app/version.ex
 VERSION=$(mix app.version)
 echo "--------------------------------------------------"
 echo "Upgrading to $VERSION"
 echo "--------------------------------------------------"
 echo
-
-MIX_ENV=prod mix compile
 
 MIX_ENV=prod mix release --env=prod --upgrade
 

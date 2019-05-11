@@ -67,7 +67,7 @@ defmodule CapViewerWeb.EntriesLive do
     ~L"""
     <div>
       <code>
-        <span><%= entry[:created_at] %></span>
+        <span><%= entry[:created_at] %> UTC</span>
       </code>
       <div><%= entry[:body] %></div>
     </div>
@@ -88,7 +88,7 @@ defmodule CapViewerWeb.EntriesLive do
        query: "",
        query_time_usec: query_time_usec,
        uptime: uptime(),
-       per_page: "all"
+       per_page: "25"
      )}
   end
 
