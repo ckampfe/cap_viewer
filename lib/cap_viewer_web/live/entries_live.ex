@@ -159,25 +159,35 @@ defmodule CapViewerWeb.EntriesLive do
     {:noreply, assign(socket, entries: entries, query: query, query_time_usec: query_time_usec)}
   end
 
-  def fetch_entries(%{query: query, sort: sort, per_page: per_page}) do
+  def fetch_entries(%{query: where, sort: sort, per_page: per_page}) do
+    query_with_wildcards =
+      if where do
+        "%" <> where <> "%"
+      else
+        "%%"
+      end
+
+    {query, bindings} =
+      if per_page != "all" do
+        {"SELECT body, date(created_at) as date, created_at
+          FROM entries
+          WHERE body LIKE ?1
+          ORDER BY created_at #{sort}
+          LIMIT ?2;", [query_with_wildcards, per_page]}
+      else
+        {"SELECT body, date(created_at) as date, created_at
+          FROM entries
+          WHERE body LIKE ?1
+          ORDER BY created_at #{sort};", [query_with_wildcards]}
+      end
+
     {:ok, entries} =
       Sqlitex.with_db(@sqlite_db_location, fn db ->
         Sqlitex.query(
           db,
-          "SELECT body, date(created_at) as date, created_at
-          FROM entries
-        #{
-            if(query != "" && query != nil,
-              do: "WHERE body LIKE \"%" <> query <> "%\"",
-              else: ""
-            )
-          }
-        ORDER BY created_at #{sort}
-
-        #{if(per_page != "all", do: "LIMIT " <> per_page, else: "")}
-
-        ;",
-          into: %{}
+          query,
+          into: %{},
+          bind: bindings
         )
       end)
 
