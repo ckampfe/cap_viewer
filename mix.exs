@@ -40,8 +40,7 @@ defmodule CapViewer.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"},
-      {:sqlitex, "~> 1.5"},
-      {:distillery, "~> 2.0"}
+      {:sqlitex, "~> 1.5"}
     ]
   end
 end
