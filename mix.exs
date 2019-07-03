@@ -4,8 +4,8 @@ defmodule CapViewer.MixProject do
   def project do
     [
       app: :cap_viewer,
-      version: "0.2.17",
-      elixir: "~> 1.8",
+      version: "0.2.19",
+      elixir: "~> 1.9",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
