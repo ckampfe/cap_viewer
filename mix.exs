@@ -1,15 +1,17 @@
 defmodule CapViewer.MixProject do
   use Mix.Project
 
+  @app :cap_viewer
+
   def project do
     [
-      app: :cap_viewer,
-      version: "0.2.19",
+      app: @app,
+      version: "0.2.20",
       elixir: "~> 1.9",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
     ]
   end
 
