@@ -4,6 +4,8 @@ defmodule CapViewerWeb.EntriesLive do
   @sqlite_db_location Application.fetch_env!(:cap_viewer, :sqlite_db_location)
                       |> String.to_charlist()
 
+  @tick_time :timer.minutes(1)
+
   def render(assigns) do
     ~L"""
     <div>
@@ -16,12 +18,14 @@ defmodule CapViewerWeb.EntriesLive do
       <div class="container">
         <div class="row" style="display: flex; align-items: center; margin-bottom: 1.0rem;">
 
-          <div class="column column-50">
+          <div class="column column-40">
             <button phx-click="reload" style="margin-bottom: 0;">Reload</button>
             <button phx-click="flip-sort" style="margin-bottom: 0;">
               Sort <%= if(@sort == "ASC", do: "DESC", else: "ASC") %>
             </button>
           </div>
+
+          <div class="column column-20">Total entries: <%= @total_entries[:entries_count] %></div>
 
           <div class="column column-4" style="margin-left: auto;">
             <form phx-change="search" style="margin-bottom: 0;">
@@ -78,7 +82,9 @@ defmodule CapViewerWeb.EntriesLive do
     {query_time_usec, {:ok, entries}} =
       :timer.tc(fn -> fetch_entries(%{sort: "DESC", query: "", per_page: "25"}) end)
 
-    :timer.send_interval(:timer.minutes(1), self(), :tick)
+    {:ok, total_entries} = fetch_entries_count()
+
+    :timer.send_interval(@tick_time, self(), :tick)
 
     {:ok,
      assign(socket,
@@ -88,13 +94,15 @@ defmodule CapViewerWeb.EntriesLive do
        query: "",
        query_time_usec: query_time_usec,
        uptime: uptime(),
-       per_page: "25"
+       per_page: "25",
+       total_entries: total_entries
      )}
   end
 
   def handle_info(:tick, socket) do
     uptime = uptime()
-    {:noreply, assign(socket, uptime: uptime)}
+    {:ok, total_entries} = fetch_entries_count()
+    {:noreply, assign(socket, uptime: uptime, total_entries: total_entries)}
   end
 
   def handle_event("per-page-" <> per_page, _path, socket) do
@@ -112,6 +120,8 @@ defmodule CapViewerWeb.EntriesLive do
   def handle_event("reload", _path, socket) do
     opts = Enum.into(socket.assigns, %{})
 
+    {:ok, total_entries} = fetch_entries_count()
+
     {query_time_usec, {:ok, entries}} = :timer.tc(fn -> fetch_entries(opts) end)
 
     {:noreply,
@@ -120,7 +130,8 @@ defmodule CapViewerWeb.EntriesLive do
        sort: socket.assigns[:sort],
        days: socket.assigns[:days],
        query: socket.assigns[:query],
-       query_time_usec: query_time_usec
+       query_time_usec: query_time_usec,
+       total_entries: total_entries
      )}
   end
 
@@ -192,6 +203,21 @@ defmodule CapViewerWeb.EntriesLive do
       end)
 
     {:ok, group_entries_by_date(entries, sort)}
+  end
+
+  def fetch_entries_count() do
+    query = "SELECT COUNT(*) as entries_count FROM entries"
+
+    {:ok, [total_count]} =
+      Sqlitex.with_db(@sqlite_db_location, fn db ->
+        Sqlitex.query(
+          db,
+          query,
+          into: %{}
+        )
+      end)
+
+    {:ok, total_count}
   end
 
   def group_entries_by_date(entries, sort) do
