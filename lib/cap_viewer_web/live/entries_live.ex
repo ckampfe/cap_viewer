@@ -12,7 +12,7 @@ defmodule CapViewerWeb.EntriesLive do
       <%= @uptime %>
 
       <%= for per <- [10, 25, 50, 100, "all"] do %>
-        <a phx-click="per-page-<%= per %>" href=""><%= per %></a>
+        <a phx-click="per-page-<%= per %>" href="#"><%= per %></a>
       <% end %>
 
       <div class="container">
