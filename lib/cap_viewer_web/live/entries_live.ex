@@ -79,8 +79,11 @@ defmodule CapViewerWeb.EntriesLive do
   end
 
   def mount(_session, socket) do
+    sort = "DESC"
+    per_page = "25"
+
     {query_time_usec, {:ok, entries}} =
-      :timer.tc(fn -> fetch_entries(%{sort: "DESC", query: "", per_page: "25"}) end)
+      :timer.tc(fn -> fetch_entries(%{sort: sort, query: "", per_page: per_page}) end)
 
     {:ok, total_entries} = fetch_entries_count()
 
@@ -90,11 +93,11 @@ defmodule CapViewerWeb.EntriesLive do
      assign(socket,
        entries: entries,
        days: 10,
-       sort: "DESC",
+       sort: sort,
        query: "",
        query_time_usec: query_time_usec,
        uptime: uptime(),
-       per_page: "25",
+       per_page: per_page,
        total_entries: total_entries
      )}
   end
