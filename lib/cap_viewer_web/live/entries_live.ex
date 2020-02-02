@@ -78,7 +78,7 @@ defmodule CapViewerWeb.EntriesLive do
     """
   end
 
-  def mount(_session, socket) do
+  def mount(_params, _session, socket) do
     sort = "DESC"
     per_page = "25"
 
