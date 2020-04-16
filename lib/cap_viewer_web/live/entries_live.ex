@@ -1,5 +1,5 @@
 defmodule CapViewerWeb.EntriesLive do
-  use Phoenix.LiveView
+  use Phoenix.LiveView, layout: {CapViewerWeb.LayoutView, "live.html"}
 
   @sqlite_db_location Application.fetch_env!(:cap_viewer, :sqlite_db_location)
                       |> String.to_charlist()

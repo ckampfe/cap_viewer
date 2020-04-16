@@ -24,6 +24,7 @@ defmodule CapViewerWeb do
       import Plug.Conn
       import CapViewerWeb.Gettext
       alias CapViewerWeb.Router.Helpers, as: Routes
+      import Phoenix.LiveView.Controller
     end
   end
 
@@ -42,7 +43,7 @@ defmodule CapViewerWeb do
       import CapViewerWeb.ErrorHelpers
       import CapViewerWeb.Gettext
       alias CapViewerWeb.Router.Helpers, as: Routes
-      import Phoenix.LiveView.Helpers, only: [live_render: 2, live_render: 3]
+      import Phoenix.LiveView.Helpers
     end
   end
 

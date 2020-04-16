@@ -41,7 +41,8 @@ defmodule CapViewer.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"},
+      {:phoenix_live_dashboard, "~> 0.1"},
+      {:phoenix_live_view, "~> 0.12"},
       {:sqlitex, "~> 1.5"}
     ]
   end

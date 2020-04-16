@@ -1,13 +1,15 @@
 defmodule CapViewerWeb.Router do
   use CapViewerWeb, :router
+  import Phoenix.LiveView.Router
+  import Phoenix.LiveDashboard.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
-    plug :fetch_flash
-    plug Phoenix.LiveView.Flash
+    plug :fetch_live_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :put_root_layout, {CapViewerWeb.LayoutView, :root}
     plug :put_layout, {CapViewerWeb.LayoutView, :app}
   end
 
@@ -20,6 +22,7 @@ defmodule CapViewerWeb.Router do
 
     live "/entries", EntriesLive
     get "/", PageController, :index
+    live_dashboard "/dashboard"
   end
 
   # Other scopes may use custom stacks.
